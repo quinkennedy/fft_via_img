@@ -134,7 +134,7 @@ void showSumHueHighlight(){
   float amplitude = 0;
   vec3 rgb = vec3(0, 0, 0);
 
-  int numSections = 6;//u_fft.length();
+  int numSections = 22;//u_fft.length();
   for(int i = numSections; i >= 0; i--){
     highlightHue = (float(i) / float(numSections));
     amplitude = getAmpAt(hsv, highlightHue);
@@ -145,6 +145,12 @@ void showSumHueHighlight(){
 
 void showRawFFT(){
   int myFreq = int(floor((gl_FragCoord.x / u_resolution.x) * u_fft.length()));
+  float fftVal = u_fft[myFreq];
+  gl_FragColor = vec4(fftVal, fftVal, fftVal, 1);
+}
+
+void showScaledFFT(){
+  int myFreq = 1 + int(floor((gl_FragCoord.x / u_resolution.x) * (u_fft.length() * 2 / 5)));
   float fftVal = u_fft[myFreq];
   gl_FragColor = vec4(fftVal, fftVal, fftVal, 1);
 }
@@ -164,7 +170,7 @@ void showGaussianFunc(){
 
 void main()
 {
-  //showRawFFT();
+  //showScaledFFT();
   //showGaussianFunc();
   //return;
   //showSumHueHighlight();
@@ -195,14 +201,25 @@ void main()
   vec3 rgb = vec3(0., 0., 0.);
   float amplitude = 0.;
 
-  for(int i = (u_fft.length() - 1); i >= 0; i--){
-    highlightHue = (float(i) / float(u_fft.length()));
+  //for(int i = (u_fft.length() - 1); i >= 0; i--){
+  int numSamples = u_fft.length() * 2 / 5;//256;
+  int freqImpact = 1;
+  int freqCount = 0;
+  int currFrequency = u_fft.length();//0;
+  for(int i = 0; i < numSamples; i++){
+    //if (freqCount >= freqImpact){
+    //  currFrequency--;
+    //  freqImpact++;
+    //  freqCount = 0;
+    //}
+    highlightHue = (float(i) / float(numSamples));
     amplitude = getAmpAt(hsv, highlightHue);
     // attenuate based on audio level
-    float attenuation = sqrt(u_fft[i]);//max(u_fft[i], log(u_fft[i]) + 1);
+    float attenuation = sqrt(u_fft[i + 1]);//max(u_fft[i], log(u_fft[i]) + 1);
     //attenuation *= attenuation;
     amplitude *= attenuation;//(1. - attenuation);
-    rgb += HSVtoRGB(vec3(highlightHue, 1., amplitude)) / float(u_fft.length() / 2);
+    rgb += HSVtoRGB(vec3(highlightHue, 1., amplitude)) / float(numSamples / 2);
+    //freqCount++;
   }
 
   // attenuate based on mouse position
