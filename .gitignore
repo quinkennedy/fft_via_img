@@ -1,0 +1,19 @@
+# compiled app
+*.app
+
+# Resources
+*.mov
+*.mp4
+*.png
+*.jpg
+*.jpeg
+media
+
+# OSX
+.DS_Store
+
+# Xcode
+xcuserdata/
+
+# vim
+*.swp
